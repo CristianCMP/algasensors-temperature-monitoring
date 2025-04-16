@@ -11,7 +11,8 @@ import org.springframework.messaging.handler.annotation.Payload;
 
 import java.time.Duration;
 
-import static com.algaworks.algasensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE;
+import static com.algaworks.algasensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE_ALERTING;
+import static com.algaworks.algasensors.temperature.monitoring.infrastructure.rabbitmq.RabbitMQConfig.QUEUE_PROCESS_TEMPERATURE;
 
 @Slf4j
 @AllArgsConstructor
@@ -21,9 +22,16 @@ public class RabbitMQListener {
     private final TemperatureMonitoringService temperatureMonitoringService;
 
     @SneakyThrows
-    @RabbitListener(queues = QUEUE, concurrency = "2-3")
-    public void heandle(@Payload TemperatureLogData temperatureLogData/*, @Headers Map<String, Object> headers*/) {
+    @RabbitListener(queues = QUEUE_PROCESS_TEMPERATURE, concurrency = "2-3")
+    public void heandleProcessTemperature(@Payload TemperatureLogData temperatureLogData/*, @Headers Map<String, Object> headers*/) {
         temperatureMonitoringService.processTemperatureReading(temperatureLogData);
+        Thread.sleep(Duration.ofSeconds(5));
+    }
+
+    @SneakyThrows
+    @RabbitListener(queues = QUEUE_ALERTING, concurrency = "2-3")
+    public void heandleAlerting(@Payload TemperatureLogData temperatureLogData) {
+        log.info("Alerting: SensorId {} Temp {}", temperatureLogData.getSensorId(), temperatureLogData.getValue());
         Thread.sleep(Duration.ofSeconds(5));
     }
 }
