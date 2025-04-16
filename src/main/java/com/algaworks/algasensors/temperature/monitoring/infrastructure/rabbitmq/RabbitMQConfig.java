@@ -48,6 +48,6 @@ public class RabbitMQConfig {
 
     @Bean
     public Binding bindingAlerting() {
-        return BindingBuilder.bind(queueProcessTemperature()).to(exchange());
+        return BindingBuilder.bind(queueAlerting()).to(exchange());
     }
 }
